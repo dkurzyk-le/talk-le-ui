@@ -172,8 +172,8 @@ def chat_with_data_board():
         st.session_state.past.append(user_input)
         st.session_state.generated.append(output['response'])
 
-        with st.sidebar:
-            st.write(output['sources'])
+        # with st.sidebar:
+        #     st.write(output['sources'])
 
     # Finally we display the chat history
 
