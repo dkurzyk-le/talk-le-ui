@@ -10,7 +10,7 @@ import yaml
 from yaml.loader import SafeLoader
 
 URL_SEARCH = 'https://engine.talk.locationengine.ai/search'
-URL_CHAT = 'https://engine.talk.locationengine.ai/talk'
+URL_CHAT = 'https://engine.talk.locationengine.ai/v1/talk'
 
 #URL_SEARCH = 'http://localhost:8444/search'
 #URL_CHAT = 'http://localhost:8444/talk'
