@@ -9,11 +9,11 @@ import json
 import yaml
 from yaml.loader import SafeLoader
 
-# URL_SEARCH = 'http://104.131.10.41:8444/search'
-# URL_CHAT = 'http://104.131.10.41:8444/talk'
+URL_SEARCH = 'https://engine.talk.locationengine.ai/search'
+URL_CHAT = 'https://engine.talk.locationengine.ai/talk'
 
-URL_SEARCH = 'http://localhost:8444/search'
-URL_CHAT = 'http://localhost:8444/talk'
+#URL_SEARCH = 'http://localhost:8444/search'
+#URL_CHAT = 'http://localhost:8444/talk'
 
 headers = {'Accept': '*/*',
              'Accept-Encoding': 'gzip, deflate br',

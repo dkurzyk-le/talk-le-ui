@@ -4,6 +4,25 @@ services:
     build: .
     volumes:
       - .:/app
-    ports:
-      - 8553:8553
+#    ports:
+#      - 8553:8553
     container_name: talk-le-ui
+    networks:
+      - routing
+    labels:
+      # Frontend
+      - "traefik.enable=true"
+      - "traefik.docker.network=routing"
+      - "traefik.http.routers.dash.rule=Host(`dash.talk.locationengine.ai`)"
+      - "traefik.http.routers.dash.entrypoints=websecure"
+      - "traefik.http.routers.dash.tls=true"
+      - "traefik.http.routers.dash.tls.certresolver=letsencrypt"
+#      - "traefik.http.services.dash.loadbalancer.server.port=8553"
+      # redirect to https
+      - "traefik.http.routers.dash-http.entrypoints=websecure"
+      - "traefik.http.routers.dash-http.rule=Host(`dash.talk.locationengine.ai`)"
+      - "traefik.http.routers.dash-http.service=dash"
+
+networks:
+  routing:
+    external: true
