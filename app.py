@@ -197,30 +197,14 @@ def chat_with_data_board():
             message(st.session_state["past"][i], is_user=True, key=str(i) + '_user')
 
 def tagger_board():
-    if 'generated2' not in st.session_state:
-        st.session_state['generated2'] = []
-    if 'past2' not in st.session_state:
-        st.session_state['past2'] = []
+    st.title('Generate tags using GPT4')
 
-    user_input = get_text()
+    text = st.text_input(label="Text")
 
-    if user_input:
-        output = tagger_request(user_input)
+    if st.button('Generate tags'):
+        tags = tagger_request(text)
 
-        # Store the output
-        st.session_state.past2.append(user_input)
-        st.session_state.generated2.append(output['response'])
-
-        # with st.sidebar:
-        #     st.write(output['sources'])
-
-    # Finally we display the chat history
-
-    if st.session_state['generated2']:
-
-        for i in range(len(st.session_state['generated2']) -1, -1, -1):
-            message(st.session_state["generated2"][i], key=str(i))
-            message(st.session_state["past2"][i], is_user=True, key=str(i) + '_user')
+        st.text_area(label='Tags', height=400, value=tags['response'].split("\n"))
 
 
 def main():
@@ -257,7 +241,7 @@ def main():
             semantic_search_board()
         elif selected == boards[1]:
             chat_with_data_board()
-        else:
+        elif selected == boards[2]:
             tagger_board() 
     elif authentication_status == False:
         st.error('Username/password is incorrect')
