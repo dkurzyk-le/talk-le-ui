@@ -11,6 +11,7 @@ from yaml.loader import SafeLoader
 
 URL_SEARCH = 'https://engine.talk.locationengine.ai/search'
 URL_CHAT = 'https://engine.talk.locationengine.ai/v2/talk'
+URL_TAGGER = 'https://engine.talk.locationengine.ai/v2/get_tags'
 
 #URL_SEARCH = 'http://localhost:8444/search'
 #URL_CHAT = 'http://localhost:8444/talk'
@@ -49,7 +50,7 @@ authenticator = stauth.Authenticate(
 )
 
 
-boards = ['Semantic search', 'Chat with data']
+boards = ['Semantic search', 'Chat with data', 'Tagger (gpt4)']
 default_index = 0
 
 result = {"Product ID": [], "Title": [], "Text": [], "Score": []}
@@ -91,6 +92,18 @@ def talk_request(text):
     })
 
     r = requests.post(url=URL_CHAT, data=query, headers=headers)
+
+    req =  json.loads(r.text)
+
+    return req
+
+def tagger_request(text):
+    query = json.dumps({
+        "query": text,
+        "vectordb": "qdrant"
+    })
+
+    r = requests.post(url=URL_TAGGER, data=query, headers=headers)
 
     req =  json.loads(r.text)
 
@@ -183,6 +196,31 @@ def chat_with_data_board():
             message(st.session_state["generated"][i], key=str(i))
             message(st.session_state["past"][i], is_user=True, key=str(i) + '_user')
 
+def tagger_board():
+    if 'generated2' not in st.session_state:
+        st.session_state['generated2'] = []
+    if 'past2' not in st.session_state:
+        st.session_state['past2'] = []
+
+    user_input = get_text()
+
+    if user_input:
+        output = tagger_request(user_input)
+
+        # Store the output
+        st.session_state.past2.append(user_input)
+        st.session_state.generated2.append(output['response'])
+
+        # with st.sidebar:
+        #     st.write(output['sources'])
+
+    # Finally we display the chat history
+
+    if st.session_state['generated2']:
+
+        for i in range(len(st.session_state['generated2']) -1, -1, -1):
+            message(st.session_state["generated2"][i], key=str(i))
+            message(st.session_state["past2"][i], is_user=True, key=str(i) + '_user')
 
 
 def main():
@@ -217,8 +255,10 @@ def main():
 
         if selected == boards[0]:
             semantic_search_board()
-        else:
+        elif selected == boards[1]:
             chat_with_data_board()
+        else:
+            tagger_board() 
     elif authentication_status == False:
         st.error('Username/password is incorrect')
     elif authentication_status == None:
