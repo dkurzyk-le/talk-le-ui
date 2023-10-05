@@ -12,6 +12,7 @@ from yaml.loader import SafeLoader
 URL_SEARCH = 'https://engine.talk.locationengine.ai/search'
 URL_CHAT = 'https://engine.talk.locationengine.ai/v2/talk'
 URL_TAGGER = 'https://engine.talk.locationengine.ai/v2/get_tags'
+URL_CHAT_WIKI = 'https://engine.talk.locationengine.ai/v2/chat_with_wiki'
 
 #URL_SEARCH = 'http://localhost:8444/search'
 #URL_CHAT = 'http://localhost:8444/talk'
@@ -50,7 +51,12 @@ authenticator = stauth.Authenticate(
 )
 
 
-boards = ['Semantic search', 'Chat with data', 'Tagger (gpt4)']
+boards = ['Semantic search', 
+          'Chat with data', 
+          'Tagger (gpt4)',
+          'Chat with wiki data (gpt3)',
+          'Chat with wiki data (gpt4)'
+          ]
 default_index = 0
 
 result = {"Product ID": [], "Title": [], "Text": [], "Score": []}
@@ -92,6 +98,18 @@ def talk_request(text):
     })
 
     r = requests.post(url=URL_CHAT, data=query, headers=headers)
+
+    req =  json.loads(r.text)
+
+    return req
+
+def talk_wiki_request(text, model):
+    query = json.dumps({
+        "query": text,
+        "model": model
+    })
+
+    r = requests.post(url=URL_CHAT_WIKI, data=query, headers=headers)
 
     req =  json.loads(r.text)
 
@@ -171,6 +189,11 @@ def get_text():
     return input_text
 
 def chat_with_data_board():
+    if 'generated' in st.session_state:
+        del st.session_state.generated[:]
+    if 'past' in st.session_state:
+        del st.session_state.past[:]
+
     if 'generated' not in st.session_state:
         st.session_state['generated'] = []
     if 'past' not in st.session_state:
@@ -206,11 +229,42 @@ def tagger_board():
 
         st.text_area(label='Tags', height=400, value=tags['response'].split("\n"))
 
+def chat_with_wiki_data_board(model):
+    if 'generated' in st.session_state:
+        del st.session_state.generated[:]
+    if 'past' in st.session_state:
+        del st.session_state.past[:]
+
+    if 'generated' not in st.session_state:
+        st.session_state['generated'] = []
+    if 'past' not in st.session_state:
+        st.session_state['past'] = []
+
+    user_input = get_text()
+
+    if user_input:
+        output = talk_wiki_request(user_input, model)
+
+        # Store the output
+        st.session_state.past.append(user_input)
+        st.session_state.generated.append(output['response'])
+
+        # with st.sidebar:
+        #     st.write(output['sources'])
+
+    # Finally we display the chat history
+
+    if st.session_state['generated']:
+
+        for i in range(len(st.session_state['generated']) -1, -1, -1):
+            message(st.session_state["generated"][i], key=str(i))
+            message(st.session_state["past"][i], is_user=True, key=str(i) + '_user')
+
 
 def main():
 
     name, authentication_status, username = authenticator.login('Login', 'main')
-    print(authentication_status)
+
     if authentication_status:
         col1, col2 = st.columns([8, 1], gap="small")
                     
@@ -243,6 +297,11 @@ def main():
             chat_with_data_board()
         elif selected == boards[2]:
             tagger_board() 
+        elif selected == boards[3]:
+            chat_with_wiki_data_board("gpt3.5")
+        elif selected == boards[4]:
+            chat_with_wiki_data_board("gpt4")
+
     elif authentication_status == False:
         st.error('Username/password is incorrect')
     elif authentication_status == None:
