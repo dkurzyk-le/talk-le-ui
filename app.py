@@ -185,7 +185,7 @@ def semantic_search_board():
 
 
 def get_text():
-    input_text = st.text_input("You : ", "", key = "input")
+    input_text = st.text_area("You : ", "", key = "input")
     return input_text
 
 def chat_with_data_board():
